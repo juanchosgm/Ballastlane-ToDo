@@ -1,0 +1,47 @@
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEdit ? 'edit_note' : 'add_task' }}</mat-icon>
+  {{ isEdit ? 'Edit task' : 'New task' }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" maxlength="200" placeholder="What needs to be done?" cdkFocusInitial>
+      @if (form.controls.title.hasError('required') && form.controls.title.touched) {
+        <mat-error>Title is required.</mat-error>
+      }
+      @if (form.controls.title.hasError('maxlength')) {
+        <mat-error>Title must be 200 characters or fewer.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4" maxlength="2000"
+                placeholder="Add more detail (only shown in the details view)"></textarea>
+      <mat-hint align="end">{{ form.controls.description.value.length }}/2000</mat-hint>
+      @if (form.controls.description.hasError('maxlength')) {
+        <mat-error>Description must be 2000 characters or fewer.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (isEdit) {
+      <mat-checkbox formControlName="isCompleted" color="primary">
+        Mark as completed
+      </mat-checkbox>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [mat-dialog-close]="undefined" [disabled]="saving()">Cancel</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+      <mat-icon>save</mat-icon>
+      {{ isEdit ? 'Save changes' : 'Create task' }}
+    </button>
+  </mat-dialog-actions>
+</form>

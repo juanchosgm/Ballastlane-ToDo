@@ -1,0 +1,63 @@
+<button mat-button routerLink="/" class="back">
+  <mat-icon>arrow_back</mat-icon> Back to tasks
+</button>
+
+@if (loading()) {
+  <div class="center"><mat-spinner diameter="44" /></div>
+} @else if (notFound()) {
+  <div class="center empty">
+    <mat-icon>search_off</mat-icon>
+    <h3>Task not found</h3>
+    <p>It may have been deleted.</p>
+    <button mat-flat-button color="primary" routerLink="/">Go back</button>
+  </div>
+} @else if (todo(); as t) {
+  <mat-card appearance="outlined" class="detail-card">
+    <div class="head">
+      <h1 [class.strike]="t.isCompleted">{{ t.title }}</h1>
+      @if (t.isCompleted) {
+        <mat-chip class="done-chip" highlighted>Completed</mat-chip>
+      } @else {
+        <mat-chip>Pending</mat-chip>
+      }
+    </div>
+
+    <mat-divider />
+
+    <section class="block">
+      <h2>Description</h2>
+      @if (t.description) {
+        <p class="description">{{ t.description }}</p>
+      } @else {
+        <p class="muted">No description provided.</p>
+      }
+    </section>
+
+    <section class="dates">
+      <div>
+        <span class="k">Created</span>
+        <span class="v">{{ t.createdAt | date: 'medium' }}</span>
+      </div>
+      <div>
+        <span class="k">Last updated</span>
+        <span class="v">{{ t.updatedAt ? (t.updatedAt | date: 'medium') : '—' }}</span>
+      </div>
+    </section>
+
+    <mat-divider />
+
+    <div class="actions">
+      <button mat-stroked-button (click)="toggleComplete()">
+        <mat-icon>{{ t.isCompleted ? 'undo' : 'check' }}</mat-icon>
+        {{ t.isCompleted ? 'Mark as pending' : 'Mark as completed' }}
+      </button>
+      <span class="spacer"></span>
+      <button mat-stroked-button color="primary" (click)="edit()">
+        <mat-icon>edit</mat-icon> Edit
+      </button>
+      <button mat-flat-button color="warn" (click)="confirmDelete()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    </div>
+  </mat-card>
+}

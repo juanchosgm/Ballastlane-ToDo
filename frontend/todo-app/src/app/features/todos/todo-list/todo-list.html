@@ -1,0 +1,88 @@
+<section class="hero">
+  <div class="hero-text">
+    <h1>Your tasks</h1>
+    <p>Stay on top of what matters. Create, track and complete your to-dos.</p>
+  </div>
+  <button mat-flat-button color="primary" class="new-btn" (click)="openCreate()">
+    <mat-icon>add</mat-icon>
+    New task
+  </button>
+</section>
+
+<section class="stats">
+  <div class="stat">
+    <span class="stat-value">{{ total() }}</span>
+    <span class="stat-label">Total</span>
+  </div>
+  <div class="stat pending">
+    <span class="stat-value">{{ pending() }}</span>
+    <span class="stat-label">Pending</span>
+  </div>
+  <div class="stat done">
+    <span class="stat-value">{{ completed() }}</span>
+    <span class="stat-label">Completed</span>
+  </div>
+</section>
+
+@if (loading()) {
+  <div class="center">
+    <mat-spinner diameter="44" />
+  </div>
+} @else if (error()) {
+  <div class="center empty">
+    <mat-icon>cloud_off</mat-icon>
+    <h3>Couldn't reach the server</h3>
+    <p>Make sure the API is running on <code>http://localhost:5064</code>.</p>
+    <button mat-stroked-button (click)="load()">
+      <mat-icon>refresh</mat-icon> Retry
+    </button>
+  </div>
+} @else if (todos().length === 0) {
+  <div class="center empty">
+    <mat-icon>checklist</mat-icon>
+    <h3>No tasks yet</h3>
+    <p>Create your first task to get started.</p>
+    <button mat-flat-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> New task
+    </button>
+  </div>
+} @else {
+  <div class="grid">
+    @for (todo of todos(); track todo.id) {
+      <mat-card class="todo-card" [class.completed]="todo.isCompleted" appearance="outlined">
+        <div class="row">
+          <mat-checkbox
+            color="primary"
+            [checked]="todo.isCompleted"
+            (change)="toggleComplete(todo)"
+            (click)="$event.stopPropagation()"
+            [matTooltip]="todo.isCompleted ? 'Mark as pending' : 'Mark as completed'">
+          </mat-checkbox>
+
+          <a class="title-link" [routerLink]="['/todos', todo.id]">
+            <span class="title" [class.strike]="todo.isCompleted">{{ todo.title }}</span>
+            <span class="meta">Created {{ todo.createdAt | date: 'mediumDate' }}</span>
+          </a>
+
+          <span class="spacer"></span>
+
+          @if (todo.isCompleted) {
+            <mat-chip class="status done-chip" highlighted>Done</mat-chip>
+          } @else {
+            <mat-chip class="status">Pending</mat-chip>
+          }
+
+          <button mat-icon-button [routerLink]="['/todos', todo.id]" matTooltip="View details">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button (click)="openEdit(todo)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="confirmDelete(todo)" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-card>
+    }
+  </div>
+}

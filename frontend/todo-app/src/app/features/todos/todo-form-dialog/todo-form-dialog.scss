@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  min-width: min(90vw, 460px);
+}
+
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.full {
+  width: 100%;
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+mat-checkbox {
+  margin: 4px 0 8px;
+}

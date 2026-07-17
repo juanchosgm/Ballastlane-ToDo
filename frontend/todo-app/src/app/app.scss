@@ -1,0 +1,37 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  color: #1f2430;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    font-size: 1.15rem;
+    font-weight: 500;
+
+    mat-icon { color: var(--brand-1); }
+    strong { color: var(--brand-1); }
+  }
+
+  .spacer { flex: 1 1 auto; }
+
+  .ghost { color: rgba(0,0,0,.6); display: inline-flex; }
+}
+
+.page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
