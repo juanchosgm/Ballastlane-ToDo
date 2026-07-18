@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -7,14 +7,15 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TodoService } from '../../../core/services/todo.service';
-import { TodoDetail } from '../../../core/models/todo.model';
+import { STATUS_OPTIONS, TodoDetail, TodoStatus } from '../../../core/models/todo.model';
 
 export interface TodoFormDialogData {
   mode: 'create' | 'edit';
@@ -28,9 +29,10 @@ export interface TodoFormDialogData {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule,
     MatProgressBarModule,
   ],
   templateUrl: './todo-form-dialog.html',
@@ -45,6 +47,12 @@ export class TodoFormDialog {
 
   readonly isEdit = this.data.mode === 'edit';
   readonly saving = signal(false);
+  readonly statusOptions = STATUS_OPTIONS;
+  readonly statusLabels: Record<TodoStatus, string> = {
+    Pending: 'Pending',
+    InProgress: 'In progress',
+    Done: 'Done',
+  };
 
   readonly form = this.fb.nonNullable.group({
     title: [
@@ -55,7 +63,11 @@ export class TodoFormDialog {
       this.data.todo?.description ?? '',
       [Validators.maxLength(2000)],
     ],
-    isCompleted: [this.data.todo?.isCompleted ?? false],
+    status: [this.data.todo?.status ?? ('Pending' as TodoStatus)],
+    // Datepicker binds a Date (or null); we convert to/from the API's ISO string.
+    dueDate: new FormControl<Date | null>(
+      this.data.todo?.dueDate ? new Date(this.data.todo.dueDate) : null,
+    ),
   });
 
   submit(): void {
@@ -67,14 +79,16 @@ export class TodoFormDialog {
     this.saving.set(true);
     const value = this.form.getRawValue();
     const description = value.description.trim() === '' ? null : value.description.trim();
+    const dueDate = value.dueDate ? value.dueDate.toISOString() : null;
 
     const request$ = this.isEdit
       ? this.service.update(this.data.todo!.id, {
           title: value.title.trim(),
           description,
-          isCompleted: value.isCompleted,
+          status: value.status,
+          dueDate,
         })
-      : this.service.create({ title: value.title.trim(), description });
+      : this.service.create({ title: value.title.trim(), description, dueDate });
 
     request$.subscribe({
       next: (result) => {

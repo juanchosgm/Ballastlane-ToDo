@@ -13,5 +13,8 @@ public sealed class UpdateTodoRequestValidator : AbstractValidator<UpdateTodoReq
 
         RuleFor(x => x.Description)
             .MaximumLength(2000).WithMessage("Description must be 2000 characters or fewer.");
+
+        RuleFor(x => x.Status)
+            .IsInEnum().WithMessage("Status must be one of Pending, InProgress or Done.");
     }
 }

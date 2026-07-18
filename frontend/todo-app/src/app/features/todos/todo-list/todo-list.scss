@@ -17,12 +17,21 @@
   h1 { margin: 0; font-size: 1.9rem; font-weight: 700; }
   p  { margin: 6px 0 0; opacity: 0.9; }
 
-  .new-btn { --mdc-filled-button-container-color: #fff; color: var(--brand-1); font-weight: 600; }
+  .new-btn {
+    --mdc-filled-button-container-color: #fff;
+    --mdc-filled-button-label-text-color: #4f46e5;
+    background-color: #fff !important;
+    color: var(--brand-1) !important;
+    font-weight: 700;
+    box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.5);
+
+    .mdc-button__label, mat-icon { color: var(--brand-1) !important; }
+  }
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin: 18px 0 22px;
 
@@ -38,7 +47,12 @@
   .stat-value { font-size: 1.7rem; font-weight: 700; line-height: 1; }
   .stat-label { margin-top: 4px; font-size: .8rem; color: rgba(0,0,0,.55); text-transform: uppercase; letter-spacing: .04em; }
   .pending .stat-value { color: #b45309; }
+  .in-progress .stat-value { color: #1d4ed8; }
   .done .stat-value { color: #15803d; }
+}
+
+@media (max-width: 560px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 .grid {
@@ -77,6 +91,8 @@
     &.strike { text-decoration: line-through; color: rgba(0,0,0,.45); }
   }
   .meta { font-size: .78rem; color: rgba(0,0,0,.5); }
+  .due { color: rgba(0,0,0,.5); }
+  .due.overdue { color: #b91c1c; font-weight: 600; }
   &:hover .title { color: var(--brand-1); }
 }
 
@@ -86,7 +102,9 @@
   --mdc-chip-label-text-size: .72rem;
   font-weight: 600;
 }
-.done-chip { --mdc-chip-elevated-container-color: #dcfce7; color: #15803d; }
+.status-pending { --mdc-chip-elevated-container-color: #fef3c7; color: #b45309; }
+.status-in-progress { --mdc-chip-elevated-container-color: #dbeafe; color: #1d4ed8; }
+.status-done { --mdc-chip-elevated-container-color: #dcfce7; color: #15803d; }
 
 .center {
   display: flex;
@@ -104,7 +122,12 @@
   mat-icon { font-size: 46px; height: 46px; width: 46px; color: var(--brand-2); }
   h3 { margin: 6px 0 0; color: #1f2430; }
   p  { margin: 0; }
-  button { margin-top: 10px; }
+  button {
+    margin-top: 10px;
+    --mdc-filled-button-label-text-color: #fff;
+    color: #fff;
+    mat-icon { color: #fff; }
+  }
 }
 
 @media (max-width: 560px) {

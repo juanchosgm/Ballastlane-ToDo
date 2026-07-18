@@ -1,6 +1,7 @@
 using Shouldly;
 using ToDo.Application.Todos.Dtos;
 using ToDo.Application.Todos.Validators;
+using ToDo.Domain.Enums;
 using Xunit;
 
 namespace ToDo.Application.Tests.Todos;
@@ -15,7 +16,7 @@ public class TodoValidatorTests
     [InlineData("   ")]
     public void Create_is_invalid_when_title_is_blank(string title)
     {
-        var result = _createValidator.Validate(new CreateTodoRequest(title, null));
+        var result = _createValidator.Validate(new CreateTodoRequest(title, null, null));
 
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateTodoRequest.Title));
@@ -24,7 +25,7 @@ public class TodoValidatorTests
     [Fact]
     public void Create_is_invalid_when_title_exceeds_max_length()
     {
-        var result = _createValidator.Validate(new CreateTodoRequest(new string('x', 201), null));
+        var result = _createValidator.Validate(new CreateTodoRequest(new string('x', 201), null, null));
 
         result.IsValid.ShouldBeFalse();
     }
@@ -32,7 +33,7 @@ public class TodoValidatorTests
     [Fact]
     public void Create_is_valid_with_title_and_optional_description()
     {
-        var result = _createValidator.Validate(new CreateTodoRequest("Valid", null));
+        var result = _createValidator.Validate(new CreateTodoRequest("Valid", null, null));
 
         result.IsValid.ShouldBeTrue();
     }
@@ -40,7 +41,7 @@ public class TodoValidatorTests
     [Fact]
     public void Update_is_invalid_when_title_is_blank()
     {
-        var result = _updateValidator.Validate(new UpdateTodoRequest("", null, false));
+        var result = _updateValidator.Validate(new UpdateTodoRequest("", null, TodoStatus.Pending, null));
 
         result.IsValid.ShouldBeFalse();
     }

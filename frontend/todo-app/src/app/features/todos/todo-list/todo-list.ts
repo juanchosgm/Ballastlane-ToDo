@@ -12,7 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TodoService } from '../../../core/services/todo.service';
-import { TodoSummary } from '../../../core/models/todo.model';
+import { STATUS_META, TodoStatus, TodoSummary } from '../../../core/models/todo.model';
 import { TodoFormDialog, TodoFormDialogData } from '../todo-form-dialog/todo-form-dialog';
 import { ConfirmDialog, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog';
 
@@ -41,9 +41,21 @@ export class TodoList implements OnInit {
   readonly loading = signal(true);
   readonly error = signal(false);
 
+  readonly statusMeta = STATUS_META;
+
   readonly total = computed(() => this.todos().length);
-  readonly completed = computed(() => this.todos().filter((t) => t.isCompleted).length);
-  readonly pending = computed(() => this.total() - this.completed());
+  readonly pending = computed(() => this.todos().filter((t) => t.status === 'Pending').length);
+  readonly inProgress = computed(() => this.todos().filter((t) => t.status === 'InProgress').length);
+  readonly done = computed(() => this.todos().filter((t) => t.status === 'Done').length);
+
+  isDone(todo: TodoSummary): boolean {
+    return todo.status === 'Done';
+  }
+
+  /** A task is overdue when its due date has passed and it is not finished yet. */
+  isOverdue(todo: TodoSummary): boolean {
+    return todo.status !== 'Done' && todo.dueDate != null && new Date(todo.dueDate) < new Date();
+  }
 
   ngOnInit(): void {
     this.load();
@@ -85,14 +97,16 @@ export class TodoList implements OnInit {
   }
 
   toggleComplete(todo: TodoSummary): void {
-    // Preserve title/description; only flip the completion flag.
+    // Preserve title/description/due date; only flip between Done and Pending.
     this.service.getById(todo.id).subscribe({
       next: (detail) => {
+        const nextStatus: TodoStatus = detail.status === 'Done' ? 'Pending' : 'Done';
         this.service
           .update(todo.id, {
             title: detail.title,
             description: detail.description,
-            isCompleted: !detail.isCompleted,
+            status: nextStatus,
+            dueDate: detail.dueDate,
           })
           .subscribe({
             next: () => this.load(),

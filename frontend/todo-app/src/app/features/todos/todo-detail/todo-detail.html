@@ -14,12 +14,10 @@
 } @else if (todo(); as t) {
   <mat-card appearance="outlined" class="detail-card">
     <div class="head">
-      <h1 [class.strike]="t.isCompleted">{{ t.title }}</h1>
-      @if (t.isCompleted) {
-        <mat-chip class="done-chip" highlighted>Completed</mat-chip>
-      } @else {
-        <mat-chip>Pending</mat-chip>
-      }
+      <h1 [class.strike]="t.status === 'Done'">{{ t.title }}</h1>
+      <mat-chip [class]="'status-' + statusMeta[t.status].cls" highlighted>
+        {{ statusMeta[t.status].label }}
+      </mat-chip>
     </div>
 
     <mat-divider />
@@ -35,6 +33,12 @@
 
     <section class="dates">
       <div>
+        <span class="k">Due date</span>
+        <span class="v" [class.overdue]="isOverdue(t)">
+          {{ t.dueDate ? (t.dueDate | date: 'mediumDate') : '—' }}
+        </span>
+      </div>
+      <div>
         <span class="k">Created</span>
         <span class="v">{{ t.createdAt | date: 'medium' }}</span>
       </div>
@@ -48,8 +52,8 @@
 
     <div class="actions">
       <button mat-stroked-button (click)="toggleComplete()">
-        <mat-icon>{{ t.isCompleted ? 'undo' : 'check' }}</mat-icon>
-        {{ t.isCompleted ? 'Mark as pending' : 'Mark as completed' }}
+        <mat-icon>{{ t.status === 'Done' ? 'undo' : 'check' }}</mat-icon>
+        {{ t.status === 'Done' ? 'Mark as pending' : 'Mark as done' }}
       </button>
       <span class="spacer"></span>
       <button mat-stroked-button color="primary" (click)="edit()">

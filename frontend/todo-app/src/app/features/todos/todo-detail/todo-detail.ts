@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TodoService } from '../../../core/services/todo.service';
-import { TodoDetail as TodoDetailModel } from '../../../core/models/todo.model';
+import { STATUS_META, TodoDetail as TodoDetailModel, TodoStatus } from '../../../core/models/todo.model';
 import { TodoFormDialog, TodoFormDialogData } from '../todo-form-dialog/todo-form-dialog';
 import { ConfirmDialog, ConfirmDialogData } from '../../../shared/confirm-dialog/confirm-dialog';
 
@@ -40,6 +40,11 @@ export class TodoDetail implements OnInit {
   readonly todo = signal<TodoDetailModel | null>(null);
   readonly loading = signal(true);
   readonly notFound = signal(false);
+  readonly statusMeta = STATUS_META;
+
+  isOverdue(todo: TodoDetailModel): boolean {
+    return todo.status !== 'Done' && todo.dueDate != null && new Date(todo.dueDate) < new Date();
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -64,11 +69,13 @@ export class TodoDetail implements OnInit {
   toggleComplete(): void {
     const current = this.todo();
     if (!current) return;
+    const nextStatus: TodoStatus = current.status === 'Done' ? 'Pending' : 'Done';
     this.service
       .update(current.id, {
         title: current.title,
         description: current.description,
-        isCompleted: !current.isCompleted,
+        status: nextStatus,
+        dueDate: current.dueDate,
       })
       .subscribe({
         next: (updated) => this.todo.set(updated),

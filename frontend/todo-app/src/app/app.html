@@ -4,9 +4,24 @@
     <span>ToDo<strong>Board</strong></span>
   </a>
   <span class="spacer"></span>
+
   <a class="ghost" href="http://localhost:5064/swagger" target="_blank" rel="noopener" matTooltip="API docs">
     <mat-icon>api</mat-icon>
   </a>
+
+  @if (isAuthenticated()) {
+    <button mat-button [matMenuTriggerFor]="userMenu" class="user">
+      <mat-icon>account_circle</mat-icon>
+      <span class="user-email">{{ userEmail() }}</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </mat-menu>
+  }
 </mat-toolbar>
 
 <main class="page">

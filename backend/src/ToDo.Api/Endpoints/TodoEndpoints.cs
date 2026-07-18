@@ -10,7 +10,8 @@ public static class TodoEndpoints
     public static IEndpointRouteBuilder MapTodoEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/todos")
-            .WithTags("Todos");
+            .WithTags("Todos")
+            .RequireAuthorization();
 
         group.MapGet("/", async (ITodoService service, CancellationToken ct) =>
                 Results.Ok(await service.GetAllAsync(ct)))

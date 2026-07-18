@@ -17,7 +17,21 @@ public sealed class TodoItemConfiguration : IEntityTypeConfiguration<TodoItem>
         builder.Property(x => x.Description)
             .HasMaxLength(2000);
 
-        builder.Property(x => x.IsCompleted).IsRequired();
+        // Persist the enum by its name so the stored value stays readable and
+        // stable even if the numeric ordering of the enum ever changes.
+        builder.Property(x => x.Status)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.DueDate);
+
         builder.Property(x => x.CreatedAt).IsRequired();
+
+        builder.Property(x => x.UserId)
+            .IsRequired();
+
+        // Every list/detail query is scoped by owner, so index the foreign key.
+        builder.HasIndex(x => x.UserId);
     }
 }

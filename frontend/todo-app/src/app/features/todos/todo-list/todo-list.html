@@ -18,9 +18,13 @@
     <span class="stat-value">{{ pending() }}</span>
     <span class="stat-label">Pending</span>
   </div>
+  <div class="stat in-progress">
+    <span class="stat-value">{{ inProgress() }}</span>
+    <span class="stat-label">In progress</span>
+  </div>
   <div class="stat done">
-    <span class="stat-value">{{ completed() }}</span>
-    <span class="stat-label">Completed</span>
+    <span class="stat-value">{{ done() }}</span>
+    <span class="stat-label">Done</span>
   </div>
 </section>
 
@@ -49,28 +53,33 @@
 } @else {
   <div class="grid">
     @for (todo of todos(); track todo.id) {
-      <mat-card class="todo-card" [class.completed]="todo.isCompleted" appearance="outlined">
+      <mat-card class="todo-card" [class.completed]="isDone(todo)" appearance="outlined">
         <div class="row">
           <mat-checkbox
             color="primary"
-            [checked]="todo.isCompleted"
+            [checked]="isDone(todo)"
             (change)="toggleComplete(todo)"
             (click)="$event.stopPropagation()"
-            [matTooltip]="todo.isCompleted ? 'Mark as pending' : 'Mark as completed'">
+            [matTooltip]="isDone(todo) ? 'Mark as pending' : 'Mark as done'">
           </mat-checkbox>
 
           <a class="title-link" [routerLink]="['/todos', todo.id]">
-            <span class="title" [class.strike]="todo.isCompleted">{{ todo.title }}</span>
-            <span class="meta">Created {{ todo.createdAt | date: 'mediumDate' }}</span>
+            <span class="title" [class.strike]="isDone(todo)">{{ todo.title }}</span>
+            <span class="meta">
+              Created {{ todo.createdAt | date: 'mediumDate' }}
+              @if (todo.dueDate) {
+                <span class="due" [class.overdue]="isOverdue(todo)">
+                  · Due {{ todo.dueDate | date: 'mediumDate' }}
+                </span>
+              }
+            </span>
           </a>
 
           <span class="spacer"></span>
 
-          @if (todo.isCompleted) {
-            <mat-chip class="status done-chip" highlighted>Done</mat-chip>
-          } @else {
-            <mat-chip class="status">Pending</mat-chip>
-          }
+          <mat-chip class="status" [class]="'status-' + statusMeta[todo.status].cls" highlighted>
+            {{ statusMeta[todo.status].label }}
+          </mat-chip>
 
           <button mat-icon-button [routerLink]="['/todos', todo.id]" matTooltip="View details">
             <mat-icon>visibility</mat-icon>

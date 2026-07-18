@@ -30,16 +30,19 @@
 
 .dates {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding: 8px 8px 16px;
 
   div { display: flex; flex-direction: column; }
   .k { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: rgba(0,0,0,.5); }
   .v { font-weight: 500; }
+  .v.overdue { color: #b91c1c; }
 }
 
-.done-chip { --mdc-chip-elevated-container-color: #dcfce7; color: #15803d; }
+.status-pending { --mdc-chip-elevated-container-color: #fef3c7; color: #b45309; }
+.status-in-progress { --mdc-chip-elevated-container-color: #dbeafe; color: #1d4ed8; }
+.status-done { --mdc-chip-elevated-container-color: #dcfce7; color: #15803d; }
 
 .actions {
   display: flex;
