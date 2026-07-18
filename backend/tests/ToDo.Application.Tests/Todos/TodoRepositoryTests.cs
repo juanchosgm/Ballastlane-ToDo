@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using ToDo.Domain.Entities;
+using ToDo.Domain.Enums;
 using ToDo.Infrastructure.Persistence;
 using ToDo.Infrastructure.Repositories;
 using Xunit;
@@ -13,6 +14,8 @@ namespace ToDo.Application.Tests.Todos;
 /// </summary>
 public class TodoRepositoryTests
 {
+    private const string UserId = "user-1";
+
     private static TodoDbContext NewContext() =>
         new(new DbContextOptionsBuilder<TodoDbContext>()
             .UseInMemoryDatabase($"repo-tests-{Guid.NewGuid()}")
@@ -23,10 +26,10 @@ public class TodoRepositoryTests
     {
         await using var ctx = NewContext();
         var repo = new TodoRepository(ctx);
-        var item = new TodoItem("Task", "Details");
+        var item = new TodoItem("Task", "Details", UserId);
 
         await repo.AddAsync(item);
-        var fetched = await repo.GetByIdAsync(item.Id);
+        var fetched = await repo.GetByIdAsync(item.Id, UserId);
 
         fetched.ShouldNotBeNull();
         fetched!.Title.ShouldBe("Task");
@@ -34,15 +37,27 @@ public class TodoRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllAsync_returns_items_newest_first()
+    public async Task GetById_returns_null_for_another_users_task()
     {
         await using var ctx = NewContext();
         var repo = new TodoRepository(ctx);
-        await repo.AddAsync(new TodoItem("first", null));
-        await Task.Delay(5);
-        await repo.AddAsync(new TodoItem("second", null));
+        var item = new TodoItem("Private", "not yours", UserId);
+        await repo.AddAsync(item);
 
-        var all = await repo.GetAllAsync();
+        (await repo.GetByIdAsync(item.Id, "someone-else")).ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetAllAsync_returns_only_the_owners_items_newest_first()
+    {
+        await using var ctx = NewContext();
+        var repo = new TodoRepository(ctx);
+        await repo.AddAsync(new TodoItem("first", null, UserId));
+        await Task.Delay(5);
+        await repo.AddAsync(new TodoItem("second", null, UserId));
+        await repo.AddAsync(new TodoItem("other user", null, "user-2"));
+
+        var all = await repo.GetAllAsync(UserId);
 
         all.Count.ShouldBe(2);
         all[0].Title.ShouldBe("second");
@@ -53,12 +68,12 @@ public class TodoRepositoryTests
     {
         await using var ctx = NewContext();
         var repo = new TodoRepository(ctx);
-        var item = new TodoItem("temp", null);
+        var item = new TodoItem("temp", null, UserId);
         await repo.AddAsync(item);
 
         await repo.DeleteAsync(item);
 
-        (await repo.GetByIdAsync(item.Id)).ShouldBeNull();
+        (await repo.GetByIdAsync(item.Id, UserId)).ShouldBeNull();
     }
 
     [Fact]
@@ -66,15 +81,15 @@ public class TodoRepositoryTests
     {
         await using var ctx = NewContext();
         var repo = new TodoRepository(ctx);
-        var item = new TodoItem("before", null);
+        var item = new TodoItem("before", null, UserId);
         await repo.AddAsync(item);
 
-        item.Update("after", "now with description", true);
+        item.Update("after", "now with description", TodoStatus.Done, null);
         await repo.UpdateAsync(item);
 
-        var reloaded = await repo.GetByIdAsync(item.Id);
+        var reloaded = await repo.GetByIdAsync(item.Id, UserId);
         reloaded!.Title.ShouldBe("after");
-        reloaded.IsCompleted.ShouldBeTrue();
+        reloaded.Status.ShouldBe(TodoStatus.Done);
         reloaded.Description.ShouldBe("now with description");
     }
 }

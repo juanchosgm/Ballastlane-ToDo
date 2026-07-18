@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ToDo.Domain.Entities;
+using ToDo.Infrastructure.Identity;
 
 namespace ToDo.Infrastructure.Persistence;
 
-public sealed class TodoDbContext : DbContext
+public sealed class TodoDbContext : IdentityDbContext<AppUser>
 {
     public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
 
@@ -11,7 +13,8 @@ public sealed class TodoDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TodoDbContext).Assembly);
+        // Identity brings its own entity configuration; keep it before our own.
         base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TodoDbContext).Assembly);
     }
 }

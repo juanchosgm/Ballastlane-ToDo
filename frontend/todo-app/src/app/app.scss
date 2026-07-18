@@ -28,6 +28,17 @@
   .spacer { flex: 1 1 auto; }
 
   .ghost { color: rgba(0,0,0,.6); display: inline-flex; }
+
+  .user {
+    color: #1f2430;
+
+    .user-email {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }
 
 .page {

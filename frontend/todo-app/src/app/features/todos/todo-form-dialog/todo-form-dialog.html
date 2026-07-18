@@ -30,11 +30,31 @@
       }
     </mat-form-field>
 
-    @if (isEdit) {
-      <mat-checkbox formControlName="isCompleted" color="primary">
-        Mark as completed
-      </mat-checkbox>
-    }
+    <div class="fields-row">
+      @if (isEdit) {
+        <mat-form-field appearance="outline" class="status-field">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (option of statusOptions; track option) {
+              <mat-option [value]="option">{{ statusLabels[option] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="due-field">
+        <mat-label>Due date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="dueDate" placeholder="Optional">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        @if (form.controls.dueDate.value) {
+          <button matIconSuffix mat-icon-button type="button" aria-label="Clear due date"
+                  (click)="form.controls.dueDate.setValue(null)">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

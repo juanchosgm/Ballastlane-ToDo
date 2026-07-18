@@ -1,3 +1,5 @@
+using ToDo.Domain.Enums;
+
 namespace ToDo.Domain.Entities;
 
 /// <summary>
@@ -10,40 +12,55 @@ public class TodoItem
     public Guid Id { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string? Description { get; private set; }
-    public bool IsCompleted { get; private set; }
+
+    /// <summary>Lifecycle state of the task (Pending / InProgress / Done).</summary>
+    public TodoStatus Status { get; private set; }
+
+    /// <summary>Optional date by which the task should be completed.</summary>
+    public DateTimeOffset? DueDate { get; private set; }
+
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? UpdatedAt { get; private set; }
+
+    /// <summary>Identifier of the user that owns this task. Tasks are never shared across users.</summary>
+    public string UserId { get; private set; } = string.Empty;
 
     // Required by EF Core to materialise entities.
     private TodoItem() { }
 
-    public TodoItem(string title, string? description)
+    public TodoItem(string title, string? description, string userId, DateTimeOffset? dueDate = null)
     {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException("UserId is required.", nameof(userId));
+
         Id = Guid.NewGuid();
+        UserId = userId;
         Rename(title, description);
-        IsCompleted = false;
+        Status = TodoStatus.Pending;
+        DueDate = dueDate;
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
     /// <summary>Updates the editable fields of the task and stamps the change time.</summary>
-    public void Update(string title, string? description, bool isCompleted)
+    public void Update(string title, string? description, TodoStatus status, DateTimeOffset? dueDate)
     {
         Rename(title, description);
-        IsCompleted = isCompleted;
+        Status = status;
+        DueDate = dueDate;
         Touch();
     }
 
     public void MarkCompleted()
     {
-        if (IsCompleted) return;
-        IsCompleted = true;
+        if (Status == TodoStatus.Done) return;
+        Status = TodoStatus.Done;
         Touch();
     }
 
     public void MarkPending()
     {
-        if (!IsCompleted) return;
-        IsCompleted = false;
+        if (Status == TodoStatus.Pending) return;
+        Status = TodoStatus.Pending;
         Touch();
     }
 

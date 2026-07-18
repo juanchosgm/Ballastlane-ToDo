@@ -11,14 +11,15 @@ public sealed class TodoRepository : ITodoRepository
 
     public TodoRepository(TodoDbContext context) => _context = context;
 
-    public async Task<IReadOnlyList<TodoItem>> GetAllAsync(CancellationToken cancellationToken = default) =>
+    public async Task<IReadOnlyList<TodoItem>> GetAllAsync(string userId, CancellationToken cancellationToken = default) =>
         await _context.Todos
             .AsNoTracking()
+            .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
 
-    public async Task<TodoItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
-        await _context.Todos.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    public async Task<TodoItem?> GetByIdAsync(Guid id, string userId, CancellationToken cancellationToken = default) =>
+        await _context.Todos.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
 
     public async Task AddAsync(TodoItem item, CancellationToken cancellationToken = default)
     {
